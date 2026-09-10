@@ -1,0 +1,29 @@
+app-id: org.openstageset.OpenStageSet
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: open_stage_set
+
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --device=dri
+  - --socket=pulseaudio
+
+modules:
+  - name: open-stage-set
+    buildsystem: simple
+    build-commands:
+      - install -d /app/bin /app/lib /app/share/applications /app/share/icons/hicolor/256x256/apps
+      - cp -r * /app/lib/
+      - ln -s /app/lib/open_stage_set /app/bin/open_stage_set
+      - install -D org.openstageset.OpenStageSet.desktop /app/share/applications/org.openstageset.OpenStageSet.desktop
+      - install -D open-stage-set.png /app/share/icons/hicolor/256x256/apps/org.openstageset.OpenStageSet.png
+    sources:
+      - type: dir
+        path: bundle
+      - type: file
+        path: org.openstageset.OpenStageSet.desktop
+      - type: file
+        path: open-stage-set.png

@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "project_orbit" "\0"
+            VALUE "CompanyName", "Sajin's Labs" "\0"
+            VALUE "FileDescription", "Open Stage Set" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "project_orbit" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "project_orbit.exe" "\0"
-            VALUE "ProductName", "project_orbit" "\0"
+            VALUE "InternalName", "open_stage_set" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Sajin's Labs. All rights reserved." "\0"
+            VALUE "OriginalFilename", "open_stage_set.exe" "\0"
+            VALUE "ProductName", "Open Stage Set" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

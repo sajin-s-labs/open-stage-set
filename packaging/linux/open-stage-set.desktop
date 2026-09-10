@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Open Stage Set
+GenericName=Setlist & Chord Companion
+Comment=Live performance, chord transposer and setlist manager for musicians
+Exec=open_stage_set %u
+Icon=open-stage-set
+Terminal=false
+Categories=AudioVideo;Audio;Music;
+StartupNotify=true
+StartupWMClass=open_stage_set

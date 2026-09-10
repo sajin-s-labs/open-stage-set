@@ -1,0 +1,5 @@
+#!/bin/sh
+HERE="$(dirname "$(readlink -f "${0}")")"
+export PATH="${HERE}/usr/bin:${HERE}/usr/lib/open-stage-set:${PATH}"
+export LD_LIBRARY_PATH="${HERE}/usr/lib/open-stage-set/lib:${LD_LIBRARY_PATH}"
+exec "${HERE}/usr/lib/open-stage-set/open_stage_set" "$@"

@@ -70,19 +70,20 @@ jobs:
           retention-days: 7
 
   # ==========================================
-  # 2. LINUX BUILD (tar.gz)
+  # 2. LINUX BUILD (deb, rpm, arch, appimage, flatpak, tar.gz)
   # ==========================================
   build-linux:
-    name: Build Linux Desktop (x64)
+    name: Build Linux Packages (deb, rpm, arch, appimage, flatpak)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install Linux Build Dependencies
+      - name: Install Linux Build & Packaging Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev rpm zstd ruby ruby-dev rubygems flatpak flatpak-builder
+          sudo gem install --no-document fpm
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -97,23 +98,36 @@ jobs:
       - name: Build Linux Release
         run: flutter build linux --release
 
-      - name: Package Linux Archive
+      - name: Package Linux Artifacts (deb, rpm, arch, appimage, tarball)
         run: |
-          mkdir -p dist
-          tar -czvf dist/open-stage-set-linux-x64.tar.gz -C build/linux/x64/release/bundle .
+          ./packaging/linux/package-linux.sh 1.0.0
 
-      - name: Upload Linux Artifact
+      - name: Build Flatpak Bundle
+        run: |
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || true
+          flatpak install --user -y --noninteractive flathub org.freedesktop.Platform//23.08 org.freedesktop.Sdk//23.08 || true
+          if flatpak info --user org.freedesktop.Platform//23.08 >/dev/null 2>&1; then
+            mkdir -p packaging/flatpak/bundle
+            cp -r build/linux/x64/release/bundle/* packaging/flatpak/bundle/
+            cp assets/images/logo.png packaging/flatpak/open-stage-set.png
+            flatpak-builder --user --repo=flatpak-repo --force-clean build-flatpak packaging/flatpak/org.openstageset.OpenStageSet.yml
+            flatpak build-bundle --user flatpak-repo dist/open-stage-set.flatpak org.openstageset.OpenStageSet
+          else
+            echo "Flatpak runtime not available, skipping flatpak bundle"
+          fi
+
+      - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: linux-release
-          path: dist/open-stage-set-linux-x64.tar.gz
+          path: dist/*
           retention-days: 7
 
   # ==========================================
-  # 3. WINDOWS BUILD (zip)
+  # 3. WINDOWS BUILD (setup installer & portable zip)
   # ==========================================
   build-windows:
-    name: Build Windows Desktop (x64)
+    name: Build Windows Desktop (Setup & Portable)
     runs-on: windows-2022
     steps:
       - name: Checkout Code
@@ -135,57 +149,28 @@ jobs:
       - name: Build Windows Release
         run: flutter build windows --release
 
-      - name: Package Windows Archive
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
+      - name: Build Windows Setup Installer
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" windows\installer\open_stage_set.iss
+
+      - name: Package Windows Portable Archive
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist
-          Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "dist\open-stage-set-windows-x64.zip"
+          Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "dist\open-stage-set-windows-x64-portable.zip"
 
-      - name: Upload Windows Artifact
+      - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-release
-          path: dist/open-stage-set-windows-x64.zip
+          path: dist/*
           retention-days: 7
 
   # ==========================================
-  # 4. MACOS BUILD (zip)
-  # ==========================================
-  build-macos:
-    name: Build macOS Desktop
-    runs-on: macos-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          flutter-version: '3.24.5'
-          cache: true
-
-      - name: Install Dependencies
-        run: flutter pub get
-
-      - name: Build macOS Release
-        run: flutter build macos --release
-
-      - name: Package macOS App Bundle
-        run: |
-          mkdir -p dist
-          APP_PATH=$(find build/macos/Build/Products/Release -name "*.app" | head -n 1)
-          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" dist/open-stage-set-macos.zip
-
-      - name: Upload macOS Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-release
-          path: dist/open-stage-set-macos.zip
-          retention-days: 7
-
-  # ==========================================
-  # 5. WEB BUILD (tar.gz)
+  # 4. WEB BUILD (tar.gz)
   # ==========================================
   build-web:
     name: Build Web Application
@@ -220,11 +205,11 @@ jobs:
           retention-days: 7
 
   # ==========================================
-  # 6. PUBLISH GITHUB RELEASE
+  # 5. PUBLISH GITHUB RELEASE
   # ==========================================
   publish-release:
     name: Publish Multi-OS GitHub Release
-    needs: [build-android, build-linux, build-windows, build-macos, build-web]
+    needs: [build-android, build-linux, build-windows, build-web]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -269,11 +254,24 @@ jobs:
             Distraction-free, high-contrast live performance & setlist companion for musicians.
 
             #### 📦 Download Packages by Platform:
-            - 🤖 **Android APK**: `open-stage-set-android.apk` (Install on phones/tablets)
-            - 🤖 **Android Bundle**: `open-stage-set-android.aab` (Google Play Store)
-            - 🪟 **Windows**: `open-stage-set-windows-x64.zip` (Portable executable)
-            - 🐧 **Linux**: `open-stage-set-linux-x64.tar.gz` (x86_64 bundle)
-            - 🍎 **macOS**: `open-stage-set-macos.zip` (Apple Silicon & Intel)
-            - 🌐 **Web**: `open-stage-set-web.tar.gz` (Static web deployment)
+
+            ##### 🤖 Android
+            - **Standalone APK**: `open-stage-set-android.apk` (Direct install on Android phones & tablets)
+            - **Google Play Store**: `open-stage-set-android.aab` (Google Play App Bundle)
+
+            ##### 🪟 Windows Desktop
+            - **Setup Wizard Installer**: `open-stage-set-windows-x64-setup.exe` (Recommended: installs desktop shortcut, start menu entry, uninstaller)
+            - **Portable Zip**: `open-stage-set-windows-x64-portable.zip` (Portable standalone executable folder)
+
+            ##### 🐧 Linux Desktop
+            - **Debian / Ubuntu**: `open-stage-set-linux-amd64.deb` (`sudo dpkg -i ...`)
+            - **Fedora / RHEL / openSUSE**: `open-stage-set-linux-x86_64.rpm` (`sudo rpm -i ...`)
+            - **Arch Linux / Manjaro**: `open-stage-set-linux-x86_64.pkg.tar.zst` (`sudo pacman -U ...`)
+            - **Universal AppImage**: `open-stage-set-x86_64.AppImage` (Executable on any Linux distribution)
+            - **Flatpak Bundle**: `open-stage-set.flatpak` (`flatpak install ...`)
+            - **Portable Tarball**: `open-stage-set-linux-x64.tar.gz` (Extracted directory bundle)
+
+            ##### 🌐 Web Application
+            - **Static Web Production**: `open-stage-set-web.tar.gz` (Deploy to GitHub Pages, Netlify, Cloudflare, Nginx)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
