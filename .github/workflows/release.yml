@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - 'rel/**'
+      - 'release/**'
   workflow_dispatch:
     inputs:
       prerelease:
@@ -111,7 +114,7 @@ jobs:
   # ==========================================
   build-windows:
     name: Build Windows Desktop (x64)
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -122,6 +125,9 @@ jobs:
           channel: 'stable'
           flutter-version: '3.24.5'
           cache: true
+
+      - name: Enable Windows Desktop
+        run: flutter config --enable-windows-desktop
 
       - name: Install Dependencies
         run: flutter pub get
@@ -224,6 +230,21 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Determine Release Tag
+        id: tag
+        shell: bash
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG="${{ github.ref_name }}"
+          elif [[ "${{ github.ref }}" == refs/heads/rel/* ]]; then
+            TAG="${GITHUB_REF_NAME#rel/}"
+          elif [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
+            TAG="${GITHUB_REF_NAME#release/}"
+          else
+            TAG="v1.0.0"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
@@ -240,7 +261,8 @@ jobs:
           draft: ${{ inputs.draft || false }}
           prerelease: ${{ inputs.prerelease || false }}
           generate_release_notes: true
-          name: Release ${{ github.ref_name }}
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: Release ${{ steps.tag.outputs.tag }}
           body: |
             ### Open Stage Set - Multi-Platform Release 🚀
 

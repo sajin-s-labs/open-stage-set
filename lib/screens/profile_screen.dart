@@ -188,7 +188,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _pickLocalImage(ValueChanged<String> onSelected) async {
     try {
-      final result = await FilePicker.pickFiles(
+      final result = await FilePicker.platform.pickFiles(
         type: FileType.image,
         withData: true,
       );
