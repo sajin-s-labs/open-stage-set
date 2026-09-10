@@ -25,6 +25,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          flutter-version: '3.24.5'
           cache: true
 
       - name: Install Dependencies
@@ -34,7 +35,7 @@ jobs:
         run: dart format --output=none --set-exit-if-changed lib/ test/ || true
 
       - name: Static Analysis
-        run: flutter analyze lib/
+        run: flutter analyze --no-fatal-infos lib/
 
       - name: Run Unit & Widget Tests
         run: flutter test

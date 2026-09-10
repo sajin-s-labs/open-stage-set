@@ -9,8 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:open_stage_set/main.dart';
 
 void main() {
-  testWidgets('Hello World smoke test', (WidgetTester tester) async {
+  testWidgets('App smoke test loads Open Stage Set', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
-    expect(find.text('Hello World'), findsOneWidget);
+    await tester.pump();
+    expect(find.text('OPEN STAGE SET'), findsWidgets);
   });
 }
