@@ -1,0 +1,252 @@
+name: Multi-OS Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: 'Mark this release as a pre-release?'
+        required: false
+        default: false
+        type: boolean
+      draft:
+        description: 'Save as a draft release?'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  # ==========================================
+  # 1. ANDROID BUILD (APK & AAB)
+  # ==========================================
+  build-android:
+    name: Build Android (APK & AAB)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Build Android App Bundle (AAB)
+        run: flutter build appbundle --release
+
+      - name: Prepare Android Artifacts
+        run: |
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-release.apk dist/open-stage-set-android.apk
+          cp build/app/outputs/bundle/release/app-release.aab dist/open-stage-set-android.aab
+
+      - name: Upload Android Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release
+          path: dist/*
+          retention-days: 7
+
+  # ==========================================
+  # 2. LINUX BUILD (tar.gz)
+  # ==========================================
+  build-linux:
+    name: Build Linux Desktop (x64)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Linux Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Linux Release
+        run: flutter build linux --release
+
+      - name: Package Linux Archive
+        run: |
+          mkdir -p dist
+          tar -czvf dist/open-stage-set-linux-x64.tar.gz -C build/linux/x64/release/bundle .
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-release
+          path: dist/open-stage-set-linux-x64.tar.gz
+          retention-days: 7
+
+  # ==========================================
+  # 3. WINDOWS BUILD (zip)
+  # ==========================================
+  build-windows:
+    name: Build Windows Desktop (x64)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Windows Release
+        run: flutter build windows --release
+
+      - name: Package Windows Archive
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist
+          Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "dist\open-stage-set-windows-x64.zip"
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: dist/open-stage-set-windows-x64.zip
+          retention-days: 7
+
+  # ==========================================
+  # 4. MACOS BUILD (zip)
+  # ==========================================
+  build-macos:
+    name: Build macOS Desktop
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build macOS Release
+        run: flutter build macos --release
+
+      - name: Package macOS App Bundle
+        run: |
+          mkdir -p dist
+          APP_PATH=$(find build/macos/Build/Products/Release -name "*.app" | head -n 1)
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" dist/open-stage-set-macos.zip
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-release
+          path: dist/open-stage-set-macos.zip
+          retention-days: 7
+
+  # ==========================================
+  # 5. WEB BUILD (tar.gz)
+  # ==========================================
+  build-web:
+    name: Build Web Application
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Web Release
+        run: flutter build web --release --base-href "/"
+
+      - name: Package Web Build
+        run: |
+          mkdir -p dist
+          tar -czvf dist/open-stage-set-web.tar.gz -C build/web .
+
+      - name: Upload Web Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-release
+          path: dist/open-stage-set-web.tar.gz
+          retention-days: 7
+
+  # ==========================================
+  # 6. PUBLISH GITHUB RELEASE
+  # ==========================================
+  publish-release:
+    name: Publish Multi-OS GitHub Release
+    needs: [build-android, build-linux, build-windows, build-macos, build-web]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+          merge-multiple: true
+
+      - name: Display Release Files
+        run: ls -lh release-artifacts/
+
+      - name: Create or Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts/*
+          draft: ${{ inputs.draft || false }}
+          prerelease: ${{ inputs.prerelease || false }}
+          generate_release_notes: true
+          name: Release ${{ github.ref_name }}
+          body: |
+            ### Open Stage Set - Multi-Platform Release 🚀
+
+            Distraction-free, high-contrast live performance & setlist companion for musicians.
+
+            #### 📦 Download Packages by Platform:
+            - 🤖 **Android APK**: `open-stage-set-android.apk` (Install on phones/tablets)
+            - 🤖 **Android Bundle**: `open-stage-set-android.aab` (Google Play Store)
+            - 🪟 **Windows**: `open-stage-set-windows-x64.zip` (Portable executable)
+            - 🐧 **Linux**: `open-stage-set-linux-x64.tar.gz` (x86_64 bundle)
+            - 🍎 **macOS**: `open-stage-set-macos.zip` (Apple Silicon & Intel)
+            - 🌐 **Web**: `open-stage-set-web.tar.gz` (Static web deployment)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
