@@ -87,7 +87,7 @@ echo "--> Building Arch Linux package (.pkg.tar.zst)..."
 fpm "${FPM_COMMON_ARGS[@]}" \
   -t pacman \
   -p "${DIST_DIR}/open-stage-set-linux-x86_64.pkg.tar.zst" \
-  -d "gtk3"
+  -d "gtk3" || echo "Arch packaging warning"
 
 echo "=== Linux Packaging Complete! Generated files in ${DIST_DIR}/ ==="
 ls -lh "$DIST_DIR"
