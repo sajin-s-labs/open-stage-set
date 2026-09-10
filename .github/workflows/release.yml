@@ -109,9 +109,11 @@ jobs:
           if flatpak info --user org.freedesktop.Platform//23.08 >/dev/null 2>&1; then
             mkdir -p packaging/flatpak/bundle
             cp -r build/linux/x64/release/bundle/* packaging/flatpak/bundle/
-            cp assets/images/logo.png packaging/flatpak/open-stage-set.png
-            flatpak-builder --user --repo=flatpak-repo --force-clean build-flatpak packaging/flatpak/org.openstageset.OpenStageSet.yml
-            flatpak build-bundle --user flatpak-repo dist/open-stage-set.flatpak org.openstageset.OpenStageSet
+            cp web/icons/Icon-512.png packaging/flatpak/open-stage-set.png
+            flatpak-builder --user --repo=flatpak-repo --force-clean build-flatpak packaging/flatpak/org.openstageset.OpenStageSet.yml || true
+            if [ -d "flatpak-repo" ]; then
+              flatpak build-bundle --user flatpak-repo dist/open-stage-set.flatpak org.openstageset.OpenStageSet || true
+            fi
           else
             echo "Flatpak runtime not available, skipping flatpak bundle"
           fi

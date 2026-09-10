@@ -15,11 +15,11 @@ modules:
   - name: open-stage-set
     buildsystem: simple
     build-commands:
-      - install -d /app/bin /app/lib /app/share/applications /app/share/icons/hicolor/256x256/apps
+      - install -d /app/bin /app/lib /app/share/applications /app/share/icons/hicolor/512x512/apps
       - cp -r * /app/lib/
       - ln -s /app/lib/open_stage_set /app/bin/open_stage_set
       - install -D org.openstageset.OpenStageSet.desktop /app/share/applications/org.openstageset.OpenStageSet.desktop
-      - install -D open-stage-set.png /app/share/icons/hicolor/256x256/apps/org.openstageset.OpenStageSet.png
+      - install -D open-stage-set.png /app/share/icons/hicolor/512x512/apps/org.openstageset.OpenStageSet.png
     sources:
       - type: dir
         path: bundle
