@@ -12,10 +12,22 @@ import 'screens/setlist_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/stage_view_screen.dart';
 import 'screens/chord_helper_screen.dart';
+import 'package:flutter/services.dart';
 import 'screens/progression_player_screen.dart';
 import 'utils/image_utils.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
+      systemNavigationBarColor: Color(0xFF000000),
+      systemNavigationBarIconBrightness: Brightness.light,
+      systemNavigationBarDividerColor: Colors.transparent,
+    ),
+  );
   runApp(const MyApp());
 }
 
