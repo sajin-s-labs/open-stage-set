@@ -241,7 +241,8 @@ class _ChordRecommenderScreenState extends State<ChordRecommenderScreen> {
   List<_SuggestionChord> _getAllSuggestions() {
     final active = _activeChord;
     const roots = MusicTheory.chromaticNotes;
-    final rootIdx = roots.indexOf(_selectedKey);
+    int rootIdx = roots.indexOf(_selectedKey);
+    if (rootIdx == -1) rootIdx = MusicTheory.flatNotes.indexOf(_selectedKey);
     final safeRootIdx = rootIdx != -1 ? rootIdx : 0;
     String noteAt(int semitones) => roots[(safeRootIdx + semitones) % 12];
 
@@ -894,7 +895,7 @@ class _ChordRecommenderScreenState extends State<ChordRecommenderScreen> {
                         isExpanded: true,
                         dropdownColor: colorScheme.surface,
                         underline: const SizedBox(),
-                        items: MusicTheory.chromaticNotes.map((k) {
+                        items: MusicTheory.standardKeys.map((k) {
                           return DropdownMenuItem(value: k, child: Text(k, style: const TextStyle(fontWeight: FontWeight.bold)));
                         }).toList(),
                         onChanged: (val) {

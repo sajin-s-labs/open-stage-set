@@ -39,6 +39,25 @@ class _SetlistScreenState extends State<SetlistScreen> {
     );
   }
 
+  int _calculateDurationMinutes(List<String> songIds, List<Song> allSongs) {
+    if (songIds.isEmpty) return 0;
+    double totalMinutes = 0;
+    for (final id in songIds) {
+      final song = allSongs.firstWhere(
+        (s) => s.id == id,
+        orElse: () => Song(id: id, title: '', createdAt: DateTime.now()),
+      );
+      if (song.tempo != null && song.tempo! > 40) {
+        final beats = song.tempo! > 130 ? 420.0 : (song.tempo! < 90 ? 320.0 : 380.0);
+        final songMins = (beats / song.tempo!).clamp(2.0, 6.5);
+        totalMinutes += songMins;
+      } else {
+        totalMinutes += 3.5;
+      }
+    }
+    return totalMinutes.round();
+  }
+
   void _confirmDeleteSetlist(BuildContext context, Setlist setlist) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -336,7 +355,8 @@ class _SetlistScreenState extends State<SetlistScreen> {
                             itemCount: displayList.length,
                             itemBuilder: (context, index) {
                               final item = displayList[index];
-                              final durationMinutes = (item.songIds.length * 3.5).round();
+                              final allSongs = SongService.instance.songsNotifier.value;
+                              final durationMinutes = _calculateDurationMinutes(item.songIds, allSongs);
 
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 12.0),

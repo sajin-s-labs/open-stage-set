@@ -79,7 +79,14 @@ class _SongsScreenState extends State<SongsScreen> {
                     if (song.tempo != null)
                       _InfoChip(label: 'TEMPO', value: '${song.tempo} BPM'),
                     ...song.customFields.entries.map(
-                      (e) => _InfoChip(label: e.key.toUpperCase(), value: e.value),
+                      (e) {
+                        final fieldDef = SongService.instance.fieldsNotifier.value.firstWhere(
+                          (f) => f.id == e.key || f.name.toLowerCase() == e.key.toLowerCase(),
+                          orElse: () => SongFieldDefinition(id: e.key, name: e.key),
+                        );
+                        final displayLabel = fieldDef.name.isNotEmpty ? fieldDef.name : e.key;
+                        return _InfoChip(label: displayLabel.toUpperCase(), value: e.value);
+                      },
                     ),
                   ],
                 ),

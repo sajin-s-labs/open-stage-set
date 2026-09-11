@@ -5,6 +5,9 @@ class AudioSynthesizer {
   static final AudioSynthesizer instance = AudioSynthesizer._internal();
   AudioSynthesizer._internal();
 
+  /// Whether real-time audio synthesis is supported on this platform
+  bool get isSupported => true;
+
   web.AudioContext? _audioContext;
 
   web.AudioContext get _ctx {

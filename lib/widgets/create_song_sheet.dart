@@ -256,7 +256,7 @@ class _CreateSongSheetState extends State<CreateSongSheet> {
                                 (f) => f.id == entry.key,
                                 orElse: () => SongFieldDefinition(id: entry.key, name: entry.key),
                               );
-                              customValues[fieldDef.name] = entry.value.text.trim();
+                              customValues[fieldDef.id] = entry.value.text.trim();
                             }
                           }
 

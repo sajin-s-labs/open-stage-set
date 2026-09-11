@@ -70,6 +70,11 @@ class MusicTheory {
     'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'
   ];
 
+  /// Standard musical keys including natural, sharp, and common flat keys matching Circle of Fifths
+  static const List<String> standardKeys = [
+    'C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'
+  ];
+
   /// Calculate frequency in Hz from MIDI note number (A4 = 69 = 440Hz)
   static double midiToFrequency(int midi) {
     return 440.0 * pow(2.0, (midi - 69) / 12.0);

@@ -175,7 +175,7 @@ class _PianoRollScreenState extends State<PianoRollScreen> {
                         isExpanded: true,
                         dropdownColor: colorScheme.surface,
                         underline: const SizedBox(),
-                        items: MusicTheory.chromaticNotes.map((r) {
+                        items: MusicTheory.standardKeys.map((r) {
                           return DropdownMenuItem(value: r, child: Text(r, style: const TextStyle(fontWeight: FontWeight.bold)));
                         }).toList(),
                         onChanged: (val) {

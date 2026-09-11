@@ -94,6 +94,7 @@ class AppDrawer extends StatelessWidget {
                     return InkWell(
                       onTap: () {
                         Navigator.of(context).pop();
+                        Navigator.of(context).popUntil((route) => route.isFirst);
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => const ProfileScreen(),
@@ -199,38 +200,35 @@ class AppDrawer extends StatelessWidget {
                       title: item.title,
                       badge: item.badge,
                       onTap: () {
+                        Navigator.of(context).pop(); // Close drawer
+                        Navigator.of(context).popUntil((route) => route.isFirst);
+
                         if (item.title == 'Dashboard') {
-                          Navigator.of(context).popUntil((route) => route.isFirst);
+                          // Already popped to dashboard
                         } else if (item.title == 'Songs') {
-                          Navigator.of(context).pop();
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => const SongsScreen(),
                             ),
                           );
                         } else if (item.title == 'Setlist') {
-                          Navigator.of(context).pop();
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => const SetlistScreen(),
                             ),
                           );
                         } else if (item.title == 'Chord helper') {
-                          Navigator.of(context).pop();
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => const ChordHelperScreen(),
                             ),
                           );
                         } else if (item.title == 'Song studio') {
-                          Navigator.of(context).pop();
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => const ProgressionPlayerScreen(),
                             ),
                           );
-                        } else {
-                          Navigator.of(context).pop();
                         }
                       },
                     ),
@@ -244,6 +242,7 @@ class AppDrawer extends StatelessWidget {
                     title: 'Settings',
                     onTap: () {
                       Navigator.of(context).pop();
+                      Navigator.of(context).popUntil((route) => route.isFirst);
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => const SettingsScreen(),

@@ -28,6 +28,13 @@ class _CircleOfFifthsScreenState extends State<CircleOfFifthsScreen> {
   ];
 
   int _selectedIndex = 0; // Starts at 'C'
+  int _cadenceAudioToken = 0;
+
+  @override
+  void dispose() {
+    _cadenceAudioToken++;
+    super.dispose();
+  }
 
   void _playChordByName(String chordName, String quality) {
     String cleanRoot = chordName.replaceAll('♯', '#').replaceAll('♭', 'b').trim();
@@ -39,6 +46,7 @@ class _CircleOfFifthsScreenState extends State<CircleOfFifthsScreen> {
   }
 
   Future<void> _playCadence() async {
+    final token = ++_cadenceAudioToken;
     final data = _circleData[_selectedIndex];
     final subdominant = _circleData[(_selectedIndex - 1 + 12) % 12].major;
     final dominant = _circleData[(_selectedIndex + 1) % 12].major;
@@ -52,7 +60,7 @@ class _CircleOfFifthsScreenState extends State<CircleOfFifthsScreen> {
     ];
 
     for (final chord in chords) {
-      if (!mounted) return;
+      if (token != _cadenceAudioToken || !mounted) return;
       AudioSynthesizer.instance.playChord(chord.midiNotes, durationSeconds: 1.2, volume: 0.35);
       await Future.delayed(const Duration(milliseconds: 650));
     }

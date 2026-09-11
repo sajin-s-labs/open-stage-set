@@ -6,6 +6,8 @@ import 'models/song.dart';
 import 'services/profile_service.dart';
 import 'services/setlist_service.dart';
 import 'services/song_service.dart';
+import 'services/storage_service.dart';
+import 'services/audio_synth.dart';
 import 'widgets/app_drawer.dart';
 import 'screens/songs_screen.dart';
 import 'screens/setlist_screen.dart';
@@ -30,10 +32,11 @@ void main() async {
     ),
   );
 
-  // Initialize persistent storage for themes, logos, user profile, songs, and setlists
+  // Initialize persistent storage for themes, logos, user profile, songs, setlists, and app storage
   await Future.wait([
     AppTheme.init(),
     AppLogo.init(),
+    AppStorageService.instance.init(),
     ProfileService.instance.init(),
     SongService.instance.init(),
     SetlistService.instance.init(),
@@ -903,7 +906,7 @@ class HomeScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          'SOUND ON',
+                          AudioSynthesizer.instance.isSupported ? 'SOUND ON' : 'WEB AUDIO',
                           style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: colorScheme.secondary),
                         ),
                       ),

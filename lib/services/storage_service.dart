@@ -1,16 +1,51 @@
 import 'dart:convert';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Manages local application-owned storage for user images and profile media.
 /// Creates isolated, detached copies of uploaded files so the app never relies
-/// on external file paths on the user's host machine.
+/// on external file paths on the user's host machine, persisting across app restarts.
 class AppStorageService {
   static final AppStorageService instance = AppStorageService._internal();
   AppStorageService._internal();
 
+  static const String _prefStorageFilesKey = 'open_stage_set_storage_files_v1';
+
   /// In-memory application file copy cache: key -> binary bytes
   final Map<String, Uint8List> _copiedFiles = {};
   final Map<String, String> _dataUriFallback = {};
+
+  /// Initialize and load stored files from persistent preferences
+  Future<void> init() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = prefs.getString(_prefStorageFilesKey);
+      if (jsonStr != null) {
+        final decoded = json.decode(jsonStr) as Map<String, dynamic>;
+        for (final entry in decoded.entries) {
+          final uri = entry.value.toString();
+          _dataUriFallback[entry.key] = uri;
+          final comma = uri.indexOf(',');
+          if (comma != -1) {
+            try {
+              _copiedFiles[entry.key] = base64Decode(uri.substring(comma + 1));
+            } catch (_) {}
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Failed to load application storage files: $e');
+    }
+  }
+
+  Future<void> _persistFiles() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_prefStorageFilesKey, json.encode(_dataUriFallback));
+    } catch (e) {
+      debugPrint('Failed to persist application storage files: $e');
+    }
+  }
 
   /// Stores an isolated copy of user-provided image bytes in application storage.
   /// Returns a clean application storage URI (`app_storage://<id>`).
@@ -43,6 +78,8 @@ class AppStorageService {
     final base64String = base64Encode(detachedCopy);
     _dataUriFallback[storageKey] = 'data:$mime;base64,$base64String';
 
+    _persistFiles();
+
     return storageKey;
   }
 
@@ -72,6 +109,7 @@ class AppStorageService {
   void removeImage(String storageKey) {
     _copiedFiles.remove(storageKey);
     _dataUriFallback.remove(storageKey);
+    _persistFiles();
   }
 
   /// Helper to get user-friendly display name of an application storage item

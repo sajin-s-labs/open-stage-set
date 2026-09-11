@@ -630,6 +630,12 @@ class _StageViewScreenState extends State<StageViewScreen> {
                                           spacing: 8,
                                           runSpacing: 6,
                                           children: song.customFields.entries.map((entry) {
+                                            final fieldDef = SongService.instance.fieldsNotifier.value.firstWhere(
+                                              (f) => f.id == entry.key || f.name.toLowerCase() == entry.key.toLowerCase(),
+                                              orElse: () => SongFieldDefinition(id: entry.key, name: entry.key),
+                                            );
+                                            final displayLabel = fieldDef.name.isNotEmpty ? fieldDef.name : entry.key;
+
                                             return Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                               decoration: BoxDecoration(
@@ -647,7 +653,7 @@ class _StageViewScreenState extends State<StageViewScreen> {
                                                   ),
                                                   children: [
                                                     TextSpan(
-                                                      text: '${entry.key.toUpperCase()}: ',
+                                                      text: '${displayLabel.toUpperCase()}: ',
                                                       style: TextStyle(
                                                         fontWeight: FontWeight.bold,
                                                         fontSize: 10,

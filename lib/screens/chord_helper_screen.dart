@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/audio_synth.dart';
 import 'chord_recommender_screen.dart';
 import 'circle_of_fifths_screen.dart';
 import 'piano_roll_screen.dart';
@@ -79,7 +80,7 @@ class ChordHelperScreen extends StatelessWidget {
                         border: Border.all(color: colorScheme.outline, width: 0.8),
                       ),
                       child: Text(
-                        'AUDIO ON',
+                        AudioSynthesizer.instance.isSupported ? 'AUDIO ON' : 'WEB AUDIO ONLY',
                         style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.bold,

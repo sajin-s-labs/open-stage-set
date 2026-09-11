@@ -12,77 +12,77 @@ class SetlistService {
   static const String _prefActiveSetlistIdKey = 'open_stage_set_active_setlist_id';
 
   static const List<SetlistOptionDefinition> defaultOptions = [
-    const SetlistOptionDefinition(
+    SetlistOptionDefinition(
       id: 'date',
       name: 'Event Date',
       description: 'Show performance date on setlist cards and header',
       isVisible: true,
       category: 'metadata',
     ),
-    const SetlistOptionDefinition(
+    SetlistOptionDefinition(
       id: 'location',
       name: 'Venue / Location',
       description: 'Show stage or venue location',
       isVisible: true,
       category: 'metadata',
     ),
-    const SetlistOptionDefinition(
+    SetlistOptionDefinition(
       id: 'song_key',
       name: 'Song Musical Key',
       description: 'Show key tags next to song titles in setlists',
       isVisible: true,
       category: 'metadata',
     ),
-    const SetlistOptionDefinition(
+    SetlistOptionDefinition(
       id: 'song_tempo',
       name: 'Song Tempo (BPM)',
       description: 'Display BPM tempo tags next to songs',
       isVisible: true,
       category: 'metadata',
     ),
-    const SetlistOptionDefinition(
+    SetlistOptionDefinition(
       id: 'song_artist',
       name: 'Song Author / Artist',
       description: 'Show author/artist beneath song titles in setlists',
       isVisible: true,
       category: 'metadata',
     ),
-    const SetlistOptionDefinition(
+    SetlistOptionDefinition(
       id: 'song_notes',
       name: 'Custom Fields & Stage Notes',
       description: 'Display capo, tuning, and stage notes chips in setlist songs',
       isVisible: true,
       category: 'metadata',
     ),
-    const SetlistOptionDefinition(
+    SetlistOptionDefinition(
       id: 'song_numbers',
       name: 'Track Sequence Numbers',
       description: 'Show #1, #2, #3 numbering on setlist items',
       isVisible: true,
       category: 'metadata',
     ),
-    const SetlistOptionDefinition(
+    SetlistOptionDefinition(
       id: 'stage_status_bar',
       name: 'Stage Top Status Bar',
       description: 'Show live track counter and playing status banner at top of stage',
       isVisible: true,
       category: 'stage',
     ),
-    const SetlistOptionDefinition(
+    SetlistOptionDefinition(
       id: 'stage_inactive_details',
       name: 'Inactive Track Details',
       description: 'Show BPM, artist & notes on non-playing songs (hide to collapse inactive songs to titles only)',
       isVisible: true,
       category: 'stage',
     ),
-    const SetlistOptionDefinition(
+    SetlistOptionDefinition(
       id: 'stage_dim_inactive',
       name: 'Dim Inactive Tracks',
       description: 'Dim non-playing songs to spotlight the active track with high contrast',
       isVisible: false,
       category: 'stage',
     ),
-    const SetlistOptionDefinition(
+    SetlistOptionDefinition(
       id: 'stage_large_font',
       name: 'Extra Large Stage Font',
       description: 'Enlarge song titles and keys for distant legibility on floor monitors and stands',
@@ -344,6 +344,23 @@ class SetlistService {
     );
     updateSetlist(updated);
     return true;
+  }
+
+  /// Remove a song from all setlists when it is deleted from the library
+  Future<void> removeSongFromAllSetlists(String songId) async {
+    bool modified = false;
+    setlistsNotifier.value = setlistsNotifier.value.map((s) {
+      if (s.songIds.contains(songId)) {
+        modified = true;
+        return s.copyWith(
+          songIds: s.songIds.where((id) => id != songId).toList(),
+        );
+      }
+      return s;
+    }).toList();
+    if (modified) {
+      await _saveSetlists();
+    }
   }
 
   /// Delete a setlist

@@ -28,9 +28,10 @@ void main() {
       final img = await picture.toImage(size.toInt(), size.toInt());
       final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
       final bytes = byteData!.buffer.asUint8List();
-
-      File('assets/images/logo.png').writeAsBytesSync(bytes);
-      print('Wrote assets/images/logo.png (${bytes.length} bytes)');
+      expect(bytes, isNotEmpty);
+      if (!File('assets/images/logo.png').existsSync() || Platform.environment['GENERATE_ASSETS'] == 'true') {
+        File('assets/images/logo.png').writeAsBytesSync(bytes);
+      }
     }
 
     // 2. Render Adaptive Icon Foreground (Transparent background, centered in safe-zone)
@@ -51,8 +52,10 @@ void main() {
       final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
       final bytes = byteData!.buffer.asUint8List();
 
-      File('assets/images/logo_foreground.png').writeAsBytesSync(bytes);
-      print('Wrote assets/images/logo_foreground.png (${bytes.length} bytes)');
+      expect(bytes, isNotEmpty);
+      if (!File('assets/images/logo_foreground.png').existsSync() || Platform.environment['GENERATE_ASSETS'] == 'true') {
+        File('assets/images/logo_foreground.png').writeAsBytesSync(bytes);
+      }
     }
   });
 }

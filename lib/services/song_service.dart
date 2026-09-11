@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/song.dart';
+import 'setlist_service.dart';
 
 class SongService {
   static final SongService instance = SongService._internal();
@@ -11,49 +12,49 @@ class SongService {
   static const String _prefFieldsKey = 'open_stage_set_song_fields';
 
   static const List<SongFieldDefinition> defaultFields = [
-    const SongFieldDefinition(
+    SongFieldDefinition(
       id: 'author',
       name: 'Author / Artist',
       isSystem: true,
       isVisible: true,
       placeholder: 'e.g. David Bowie',
     ),
-    const SongFieldDefinition(
+    SongFieldDefinition(
       id: 'key',
       name: 'Musical Key',
       isSystem: true,
       isVisible: true,
       placeholder: 'e.g. C, G, Em, F#m',
     ),
-    const SongFieldDefinition(
+    SongFieldDefinition(
       id: 'tempo',
       name: 'Tempo (BPM)',
       isSystem: true,
       isVisible: true,
       placeholder: 'e.g. 120',
     ),
-    const SongFieldDefinition(
+    SongFieldDefinition(
       id: 'time_sig',
       name: 'Time Signature',
       isSystem: false,
       isVisible: true,
       placeholder: 'e.g. 4/4, 3/4, 6/8',
     ),
-    const SongFieldDefinition(
+    SongFieldDefinition(
       id: 'capo',
       name: 'Capo Position',
       isSystem: false,
       isVisible: true,
       placeholder: 'e.g. 2nd Fret, None',
     ),
-    const SongFieldDefinition(
+    SongFieldDefinition(
       id: 'tuning',
       name: 'Instrument Tuning',
       isSystem: false,
       isVisible: true,
       placeholder: 'e.g. Standard E, Drop D, DADGAD',
     ),
-    const SongFieldDefinition(
+    SongFieldDefinition(
       id: 'notes',
       name: 'Stage Notes',
       isSystem: false,
@@ -224,10 +225,11 @@ class SongService {
     await _saveSongs();
   }
 
-  /// Delete a song
+  /// Delete a song and remove it from all setlists
   Future<void> deleteSong(String id) async {
     songsNotifier.value = songsNotifier.value.where((s) => s.id != id).toList();
     await _saveSongs();
+    await SetlistService.instance.removeSongFromAllSetlists(id);
   }
 
   /// Add a new custom field definition

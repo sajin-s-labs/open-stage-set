@@ -53,7 +53,7 @@ class AppTheme {
 
   /// Global AppThemeMode notifier to switch themes from anywhere in the app
   static final ValueNotifier<AppThemeMode> currentThemeMode =
-      ValueNotifier<AppThemeMode>(AppThemeMode.oledDark);
+      ValueNotifier<AppThemeMode>(AppThemeMode.light);
 
   /// Load persisted theme on app startup
   static Future<void> init() async {
@@ -63,7 +63,7 @@ class AppTheme {
       if (savedMode != null) {
         currentThemeMode.value = AppThemeMode.values.firstWhere(
           (m) => m.name == savedMode,
-          orElse: () => AppThemeMode.oledDark,
+          orElse: () => AppThemeMode.light,
         );
       }
     } catch (e) {
