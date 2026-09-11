@@ -1,99 +1,104 @@
-# Open Stage Set 🎸🎹
+<div align="center">
 
-> **Distraction-free, high-contrast monochrome live performance & setlist companion for gigging musicians.**
+<img src="assets/images/logo.png" alt="Open Stage Set Logo" width="112" height="112" style="border-radius: 20px;" />
 
----
+# Open Stage Set
 
-## 🌟 Key Features
+**Distraction-free, high-contrast live performance & setlist companion for musicians.**
 
-### 1. 📋 Setlists & Live Stage View
-- **Upcoming vs. Past Shows**: Automatic routing of concluded gigs into **Past Shows (Archive)** based on performance date (`date < today`) or manual gig completion.
-- **Stage Display Teleprompter**: Clean, large-font stage mode with high-contrast active song spotlighting, custom stage chips (Capo, Tuning, Key, BPM), and live completion controls.
-- **Set Duration Estimator**: Dynamic calculation of total gig length (`~32 min`) based on track tempos and standard durations.
-- **Quick Actions**: Move songs up/down, duplicate setlists, edit venues, and re-open past shows into upcoming with one tap.
+[![Release](https://img.shields.io/github/v/release/sajin-s-labs/open-stage-set?color=18181b&label=Release&style=flat-square)](https://github.com/sajin-s-labs/open-stage-set/releases/latest)
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Windows%20%7C%20Linux%20%7C%20Web-18181b?style=flat-square)](#installation)
+[![Built with Flutter](https://img.shields.io/badge/Built%20with-Flutter-02569B?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
 
-### 2. 🎼 Song Studio & Smart Transposition
-- **Song Library**: Filter by key, tempo, author, and search instantly across custom stage fields.
-- **Musical Transposer**: Transpose chord progressions with Roman numeral harmonic analysis and key modulation insights.
-- **Interactive Chord Pattern Charts**: Visual piano roll and guitar chord fingerings for recommended substitutions and tensions.
+[**Download Latest Release**](https://github.com/sajin-s-labs/open-stage-set/releases/latest) • [**Features**](#features) • [**Installation**](#installation)
 
-### 3. 🔄 Music Theory Utilities
-- **Interactive Circle of Fifths**: Explore relative minors, enharmonic equivalents, and dominant/subdominant relationships.
-- **Harmonic Chord Recommender**: AI-assisted modal modulation and tension suggestions tailored for live composition.
+</div>
 
 ---
 
-## 💻 Supported Operating Systems & Packages
-
-| Platform | Target Formats | Description |
-| :--- | :--- | :--- |
-| 🤖 **Android** | `.apk` & `.aab` | Universal standalone APK + Google Play App Bundle |
-| 🪟 **Windows** | `.exe` (Setup) & `.zip` (Portable) | Inno Setup wizard installer + standalone portable x64 zip |
-| 🐧 **Linux** | `.deb`, `.rpm`, `.pkg.tar.zst`, `.AppImage`, `.flatpak`, `.tar.gz` | Debian/Ubuntu, Fedora/RHEL, Arch Linux, AppImage, Flatpak & Tarball |
-| 🌐 **Web** | `.tar.gz` | Static web bundle (deployable to GitHub Pages, Netlify, Vercel, Nginx) |
+**Open Stage Set** is an open-source, stage-ready repertoire and live performance manager designed specifically for gigging musicians. Featuring a glare-proof, high-contrast monochromatic design, it delivers immediate legibility on stage—whether under blinding stage spotlights or bright direct sunlight.
 
 ---
 
-## 🚀 GitHub Actions: Multi-OS Automated Builds
+<a id="features"></a>
+## ⚡ Features
 
-Two GitHub Actions workflows are included in `.github/workflows/`:
+- **Live Stage Teleprompter** — Glare-resistant live view featuring active song spotlighting, instant song completion toggles, capo positions, BPM indicators, and custom performance notes.
+- **Gig & Setlist Manager** — Create and manage setlists with drag-and-drop song ordering, dynamic set duration estimation, and automatic archiving of concluded shows.
+- **Smart Song Studio & Transposer** — Comprehensive song library with one-tap key transposition, Roman numeral harmonic analysis, and interactive piano roll & guitar chord charts.
+- **Interactive Circle of Fifths** — Visual harmonic wheel for on-the-fly key modulation, relative minor discovery, and tension chord recommendations.
+- **Built-in Native Audio Engine** — Zero-latency procedural and MIDI synthesis for acoustic piano, chord progressions, arpeggios, and metronome click pulses across every platform.
+- **Adaptive Day & Night Modes** — Clean monochromatic aesthetic with seamless switching between Stage Dark (anti-glare) and Daylight (high-visibility outdoor) modes.
 
-### 1. `release.yml` — Automated Multi-OS Release Workflow
-Builds packages for **Android, Windows, Linux, and Web** in parallel, generating native installers and publication formats.
+---
 
-#### How to Trigger:
-- **Option A: Push to Release Branch (Recommended)**
+<a id="installation"></a>
+## 📦 Installation & Downloads
+
+Pre-built binaries are available on the [**Latest Release Page**](https://github.com/sajin-s-labs/open-stage-set/releases/latest). Choose your operating system below:
+
+### 🤖 Android (Phones & Tablets)
+1. Download [**`open-stage-set-android.apk`**](https://github.com/sajin-s-labs/open-stage-set/releases/latest/download/open-stage-set-android.apk).
+2. Open the file on your device and follow the prompt to install *(enable "Install unknown apps" in Android settings if requested)*.
+
+---
+
+### 🪟 Windows Desktop
+- **Installer (Recommended)**: Download and run [**`open-stage-set-windows-x64-setup.exe`**](https://github.com/sajin-s-labs/open-stage-set/releases/latest/download/open-stage-set-windows-x64-setup.exe) to install the app with desktop shortcuts and start menu integration.
+- **Portable Version**: Download [**`open-stage-set-windows-x64-portable.zip`**](https://github.com/sajin-s-labs/open-stage-set/releases/latest/download/open-stage-set-windows-x64-portable.zip), extract to any directory, and run `open_stage_set.exe`.
+
+---
+
+### 🐧 Linux Desktop
+
+Select the package format for your distribution:
+
+- **Universal AppImage** *(runs on any Linux distro)*:
   ```bash
-  git checkout -b rel/v1.0.0
-  git push origin rel/v1.0.0
+  # Download open-stage-set-x86_64.AppImage, then:
+  chmod +x open-stage-set-x86_64.AppImage
+  ./open-stage-set-x86_64.AppImage
   ```
-  GitHub Actions will immediately compile all platform builds and publish a GitHub Release tagged `v1.0.0` with all downloadable assets attached.
+  👉 [Download AppImage](https://github.com/sajin-s-labs/open-stage-set/releases/latest/download/open-stage-set-x86_64.AppImage)
 
-- **Option B: Push a Version Tag**
+- **Ubuntu / Debian / Linux Mint** (`.deb`):
   ```bash
-  git tag v1.0.0
-  git push origin v1.0.0
+  sudo dpkg -i open-stage-set-linux-amd64.deb
   ```
+  👉 [Download .deb](https://github.com/sajin-s-labs/open-stage-set/releases/latest/download/open-stage-set-linux-amd64.deb)
 
-- **Option C: Manual Trigger (`workflow_dispatch`)**
-  1. Go to the **Actions** tab on your GitHub repository.
-  2. Select **Multi-OS Build & Release** from the left sidebar.
-  3. Click **Run workflow**, optionally toggling draft or pre-release flags.
+- **Fedora / RHEL / openSUSE** (`.rpm`):
+  ```bash
+  sudo rpm -i open-stage-set-linux-x86_64.rpm
+  ```
+  👉 [Download .rpm](https://github.com/sajin-s-labs/open-stage-set/releases/latest/download/open-stage-set-linux-x86_64.rpm)
 
-#### Generated Release Assets:
-- 🤖 **Android**: `open-stage-set-android.apk` (Install on phones/tablets) & `open-stage-set-android.aab` (Play Store)
-- 🪟 **Windows**: `open-stage-set-windows-x64-setup.exe` (Setup Installer) & `open-stage-set-windows-x64-portable.zip` (Portable)
-- 🐧 **Linux**: `open-stage-set-linux-amd64.deb` (Debian/Ubuntu), `open-stage-set-linux-x86_64.rpm` (Fedora/RHEL), `open-stage-set-linux-x86_64.pkg.tar.zst` (Arch), `open-stage-set-x86_64.AppImage` (Universal AppImage), `open-stage-set.flatpak` (Flatpak), `open-stage-set-linux-x64.tar.gz` (Tarball)
-- 🌐 **Web**: `open-stage-set-web.tar.gz` (Static web production build)
+- **Arch Linux / Manjaro** (`.pkg.tar.zst`):
+  ```bash
+  sudo pacman -U open-stage-set-linux-x86_64.pkg.tar.zst
+  ```
+  👉 [Download Arch Package](https://github.com/sajin-s-labs/open-stage-set/releases/latest/download/open-stage-set-linux-x86_64.pkg.tar.zst)
+
+- **Flatpak Bundle** (`.flatpak`):
+  ```bash
+  flatpak install open-stage-set.flatpak
+  ```
+  👉 [Download Flatpak](https://github.com/sajin-s-labs/open-stage-set/releases/latest/download/open-stage-set.flatpak)
 
 ---
 
-### 2. `ci.yml` — Continuous Integration
-Automatically runs `flutter analyze` and `flutter test` on every pull request and push to `main`/`master` to ensure zero regressions before merging.
+### 🌐 Web Application
+Deploy the pre-compiled web bundle to any static hosting service (GitHub Pages, Cloudflare Pages, Netlify, or Nginx):
+1. Download [**`open-stage-set-web.tar.gz`**](https://github.com/sajin-s-labs/open-stage-set/releases/latest/download/open-stage-set-web.tar.gz).
+2. Extract the archive into your web server's root directory:
+   ```bash
+   tar -xzf open-stage-set-web.tar.gz -C /var/www/html/
+   ```
 
 ---
 
-## 🛠️ Local Development
+<div align="center">
 
-### Prerequisites
-- Flutter SDK (3.24.x or later)
-- Dart SDK (3.5.x or later)
+Crafted for live performers. Distraction-free by design.
 
-### Run Locally
-```bash
-# Run on web
-flutter run -d web-server --web-port 8765 --web-hostname 0.0.0.0
-
-# Run on Android device/emulator
-flutter run -d android
-
-# Run on Desktop (Linux / macOS / Windows)
-flutter run -d linux   # On Linux
-flutter run -d windows # On Windows
-flutter run -d macos   # On macOS
-```
-
-### Static Analysis
-```bash
-flutter analyze lib/
-```
+</div>
