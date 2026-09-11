@@ -1,13 +1,17 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/setlist.dart';
 
 class SetlistService {
   static final SetlistService instance = SetlistService._internal();
   SetlistService._internal();
 
-  /// Reactive list of display options (what to show and hide in setlists and stage view)
-  final ValueNotifier<List<SetlistOptionDefinition>> optionsNotifier =
-      ValueNotifier<List<SetlistOptionDefinition>>([
+  static const String _prefSetlistsKey = 'open_stage_set_setlists_list';
+  static const String _prefOptionsKey = 'open_stage_set_setlist_options';
+  static const String _prefActiveSetlistIdKey = 'open_stage_set_active_setlist_id';
+
+  static const List<SetlistOptionDefinition> defaultOptions = [
     const SetlistOptionDefinition(
       id: 'date',
       name: 'Event Date',
@@ -85,11 +89,9 @@ class SetlistService {
       isVisible: false,
       category: 'stage',
     ),
-  ]);
+  ];
 
-  /// Reactive list of setlists
-  final ValueNotifier<List<Setlist>> setlistsNotifier =
-      ValueNotifier<List<Setlist>>([
+  static List<Setlist> get defaultSetlists => [
     Setlist(
       id: 'setlist_1',
       title: 'Summer Stage Showcase',
@@ -116,11 +118,94 @@ class SetlistService {
       isCompleted: true,
       createdAt: DateTime.now().subtract(const Duration(days: 20)),
     ),
-  ]);
+  ];
+
+  /// Reactive list of display options (what to show and hide in setlists and stage view)
+  final ValueNotifier<List<SetlistOptionDefinition>> optionsNotifier =
+      ValueNotifier<List<SetlistOptionDefinition>>(List.from(defaultOptions));
+
+  /// Reactive list of setlists
+  final ValueNotifier<List<Setlist>> setlistsNotifier =
+      ValueNotifier<List<Setlist>>(defaultSetlists);
 
   /// Currently active setlist ID for live stage performance & dashboard card
   final ValueNotifier<String?> activeSetlistIdNotifier =
       ValueNotifier<String?>('setlist_1');
+
+  /// Initialize and load saved setlists, options, and active selection
+  Future<void> init() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Load setlists
+      final setlistsJson = prefs.getString(_prefSetlistsKey);
+      if (setlistsJson != null) {
+        final List<dynamic> list = json.decode(setlistsJson);
+        setlistsNotifier.value = list
+            .map((e) => Setlist.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } else {
+        setlistsNotifier.value = List.from(defaultSetlists);
+        await _saveSetlists();
+      }
+
+      // Load options
+      final optionsJson = prefs.getString(_prefOptionsKey);
+      if (optionsJson != null) {
+        final List<dynamic> list = json.decode(optionsJson);
+        optionsNotifier.value = list
+            .map((e) =>
+                SetlistOptionDefinition.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } else {
+        optionsNotifier.value = List.from(defaultOptions);
+        await _saveOptions();
+      }
+
+      // Load active setlist ID
+      final savedActiveId = prefs.getString(_prefActiveSetlistIdKey);
+      if (savedActiveId != null) {
+        activeSetlistIdNotifier.value = savedActiveId;
+      }
+
+      // Save active setlist whenever changed
+      activeSetlistIdNotifier.addListener(() async {
+        try {
+          final p = await SharedPreferences.getInstance();
+          final val = activeSetlistIdNotifier.value;
+          if (val != null) {
+            await p.setString(_prefActiveSetlistIdKey, val);
+          } else {
+            await p.remove(_prefActiveSetlistIdKey);
+          }
+        } catch (e) {
+          debugPrint('Failed to save active setlist ID: $e');
+        }
+      });
+    } catch (e) {
+      debugPrint('Failed to load setlist preferences: $e');
+    }
+  }
+
+  Future<void> _saveSetlists() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = setlistsNotifier.value.map((s) => s.toJson()).toList();
+      await prefs.setString(_prefSetlistsKey, json.encode(list));
+    } catch (e) {
+      debugPrint('Failed to save setlists: $e');
+    }
+  }
+
+  Future<void> _saveOptions() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = optionsNotifier.value.map((o) => o.toJson()).toList();
+      await prefs.setString(_prefOptionsKey, json.encode(list));
+    } catch (e) {
+      debugPrint('Failed to save setlist options: $e');
+    }
+  }
 
   /// Check if a performance date has passed (earlier than today)
   static bool isDatePast(DateTime date) {
@@ -184,29 +269,32 @@ class SetlistService {
   }
 
   /// Toggle an option visibility (show/hide)
-  void toggleOptionVisibility(String id) {
+  Future<void> toggleOptionVisibility(String id) async {
     optionsNotifier.value = optionsNotifier.value.map((opt) {
       if (opt.id == id) {
         return opt.copyWith(isVisible: !opt.isVisible);
       }
       return opt;
     }).toList();
+    await _saveOptions();
   }
 
   /// Add a new setlist
-  void addSetlist(Setlist setlist) {
+  Future<void> addSetlist(Setlist setlist) async {
     setlistsNotifier.value = [setlist, ...setlistsNotifier.value];
+    await _saveSetlists();
   }
 
   /// Update an existing setlist
-  void updateSetlist(Setlist updated) {
+  Future<void> updateSetlist(Setlist updated) async {
     setlistsNotifier.value = setlistsNotifier.value.map((s) {
       return s.id == updated.id ? updated : s;
     }).toList();
+    await _saveSetlists();
   }
 
   /// Toggle or set a setlist as completed (archive) or active
-  void markSetlistCompleted(String id, bool completed) {
+  Future<void> markSetlistCompleted(String id, bool completed) async {
     setlistsNotifier.value = setlistsNotifier.value.map((s) {
       if (s.id == id) {
         if (!completed && isDatePast(s.date)) {
@@ -227,6 +315,7 @@ class SetlistService {
       final upcoming = upcomingSetlists;
       activeSetlistIdNotifier.value = upcoming.isNotEmpty ? upcoming.first.id : null;
     }
+    await _saveSetlists();
   }
 
   /// Duplicate an existing setlist as a copy for a new gig
@@ -258,12 +347,13 @@ class SetlistService {
   }
 
   /// Delete a setlist
-  void deleteSetlist(String id) {
+  Future<void> deleteSetlist(String id) async {
     setlistsNotifier.value = setlistsNotifier.value.where((s) => s.id != id).toList();
     if (activeSetlistIdNotifier.value == id) {
       final upcoming = upcomingSetlists;
       activeSetlistIdNotifier.value = upcoming.isNotEmpty ? upcoming.first.id : null;
     }
+    await _saveSetlists();
   }
 
   /// Preset: Standard Stage (Show helpful metadata, standard font)
@@ -274,6 +364,7 @@ class SetlistService {
       }
       return opt.copyWith(isVisible: true);
     }).toList();
+    _saveOptions();
   }
 
   /// Preset: Minimal Stage (Hide clutter: author, notes, BPM; spotlight active)
@@ -289,6 +380,7 @@ class SetlistService {
           return opt.copyWith(isVisible: false);
       }
     }).toList();
+    _saveOptions();
   }
 
   /// Preset: Pure Live Teleprompter (Hide ALL metadata, status, sequence numbers - pure song titles)
@@ -302,6 +394,7 @@ class SetlistService {
           return opt.copyWith(isVisible: false);
       }
     }).toList();
+    _saveOptions();
   }
 
   /// Total count of currently hidden options

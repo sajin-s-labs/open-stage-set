@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Model representing a candidate logo option
 class AppLogoModel {
@@ -22,9 +23,32 @@ class AppLogo extends StatelessWidget {
   final bool circular;
   final String? logoId;
 
+  static const String _prefLogoKey = 'open_stage_set_active_logo';
+
   /// Global reactive selected logo ID
   static final ValueNotifier<String> activeLogoIdNotifier =
       ValueNotifier<String>('tuning_fork');
+
+  /// Initialize and load saved logo from persistent storage
+  static Future<void> init() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedId = prefs.getString(_prefLogoKey);
+      if (savedId != null && candidateLogos.any((l) => l.id == savedId)) {
+        activeLogoIdNotifier.value = savedId;
+      }
+      activeLogoIdNotifier.addListener(() async {
+        try {
+          final p = await SharedPreferences.getInstance();
+          await p.setString(_prefLogoKey, activeLogoIdNotifier.value);
+        } catch (e) {
+          debugPrint('Failed to save logo preference: $e');
+        }
+      });
+    } catch (e) {
+      debugPrint('Failed to load logo preference: $e');
+    }
+  }
 
   /// Full catalogue of candidate logo options
   static const List<AppLogoModel> candidateLogos = [

@@ -29,6 +29,22 @@ class SongFieldDefinition {
       placeholder: placeholder ?? this.placeholder,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'isSystem': isSystem,
+    'isVisible': isVisible,
+    'placeholder': placeholder,
+  };
+
+  factory SongFieldDefinition.fromJson(Map<String, dynamic> json) => SongFieldDefinition(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    isSystem: json['isSystem'] as bool? ?? false,
+    isVisible: json['isVisible'] as bool? ?? true,
+    placeholder: json['placeholder'] as String? ?? '',
+  );
 }
 
 /// Representation of a song with core and user-defined metadata
@@ -70,4 +86,27 @@ class Song {
       createdAt: createdAt ?? this.createdAt,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'artist': artist,
+    'musicalKey': musicalKey,
+    'tempo': tempo,
+    'customFields': customFields,
+    'createdAt': createdAt.toIso8601String(),
+  };
+
+  factory Song.fromJson(Map<String, dynamic> json) => Song(
+    id: json['id'] as String,
+    title: json['title'] as String,
+    artist: json['artist'] as String?,
+    musicalKey: json['musicalKey'] as String?,
+    tempo: json['tempo'] as int?,
+    customFields: (json['customFields'] as Map<String, dynamic>?)?.map(
+          (k, v) => MapEntry(k, v.toString()),
+        ) ??
+        const {},
+    createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
+  );
 }

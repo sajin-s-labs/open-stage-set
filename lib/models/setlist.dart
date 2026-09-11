@@ -29,6 +29,23 @@ class SetlistOptionDefinition {
       category: category ?? this.category,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'description': description,
+    'isVisible': isVisible,
+    'category': category,
+  };
+
+  factory SetlistOptionDefinition.fromJson(Map<String, dynamic> json) =>
+      SetlistOptionDefinition(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        description: json['description'] as String,
+        isVisible: json['isVisible'] as bool? ?? true,
+        category: json['category'] as String? ?? 'metadata',
+      );
 }
 
 /// Representation of a live performance setlist
@@ -70,4 +87,28 @@ class Setlist {
       createdAt: createdAt ?? this.createdAt,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'date': date.toIso8601String(),
+    'location': location,
+    'songIds': songIds,
+    'isCompleted': isCompleted,
+    'createdAt': createdAt.toIso8601String(),
+  };
+
+  factory Setlist.fromJson(Map<String, dynamic> json) => Setlist(
+    id: json['id'] as String,
+    title: json['title'] as String,
+    date: DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
+    location: json['location'] as String?,
+    songIds: (json['songIds'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        const [],
+    isCompleted: json['isCompleted'] as bool? ?? false,
+    createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+        DateTime.now(),
+  );
 }

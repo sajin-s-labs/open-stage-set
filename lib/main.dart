@@ -15,8 +15,9 @@ import 'screens/chord_helper_screen.dart';
 import 'package:flutter/services.dart';
 import 'screens/progression_player_screen.dart';
 import 'utils/image_utils.dart';
+import 'widgets/app_logo.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -28,6 +29,16 @@ void main() {
       systemNavigationBarDividerColor: Colors.transparent,
     ),
   );
+
+  // Initialize persistent storage for themes, logos, user profile, songs, and setlists
+  await Future.wait([
+    AppTheme.init(),
+    AppLogo.init(),
+    ProfileService.instance.init(),
+    SongService.instance.init(),
+    SetlistService.instance.init(),
+  ]);
+
   runApp(const MyApp());
 }
 

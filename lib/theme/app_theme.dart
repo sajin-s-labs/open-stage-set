@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Available Monochrome Theme Modes
 enum AppThemeMode {
@@ -48,13 +49,41 @@ class AppColors {
 
 /// Global theme management and themes for Open Stage Set
 class AppTheme {
+  static const String _prefThemeKey = 'open_stage_set_theme_mode';
+
   /// Global AppThemeMode notifier to switch themes from anywhere in the app
   static final ValueNotifier<AppThemeMode> currentThemeMode =
       ValueNotifier<AppThemeMode>(AppThemeMode.oledDark);
 
-  /// Set explicit theme mode
+  /// Load persisted theme on app startup
+  static Future<void> init() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedMode = prefs.getString(_prefThemeKey);
+      if (savedMode != null) {
+        currentThemeMode.value = AppThemeMode.values.firstWhere(
+          (m) => m.name == savedMode,
+          orElse: () => AppThemeMode.oledDark,
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to load theme preference: $e');
+    }
+  }
+
+  /// Set explicit theme mode and save to persistent storage
   static void setTheme(AppThemeMode mode) {
     currentThemeMode.value = mode;
+    _saveTheme(mode);
+  }
+
+  static Future<void> _saveTheme(AppThemeMode mode) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_prefThemeKey, mode.name);
+    } catch (e) {
+      debugPrint('Failed to save theme preference: $e');
+    }
   }
 
   /// Cycle through available themes: OLED Dark -> Grayscale -> Light -> OLED Dark

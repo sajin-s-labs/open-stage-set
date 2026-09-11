@@ -91,4 +91,37 @@ class UserProfile {
       lightBackgroundUrl: lightBackgroundUrl ?? this.lightBackgroundUrl,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'bandName': bandName,
+    'instruments': instruments,
+    'avatarUrl': avatarUrl,
+    'backgroundUrl': backgroundUrl,
+    'dynamicThemeImages': dynamicThemeImages,
+    'darkAvatarUrl': darkAvatarUrl,
+    'grayscaleAvatarUrl': grayscaleAvatarUrl,
+    'lightAvatarUrl': lightAvatarUrl,
+    'darkBackgroundUrl': darkBackgroundUrl,
+    'grayscaleBackgroundUrl': grayscaleBackgroundUrl,
+    'lightBackgroundUrl': lightBackgroundUrl,
+  };
+
+  factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
+    name: json['name'] as String? ?? 'Stage Performer',
+    bandName: json['bandName'] as String? ?? 'Live Ensemble',
+    instruments: (json['instruments'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        const [],
+    avatarUrl: json['avatarUrl'] as String?,
+    backgroundUrl: json['backgroundUrl'] as String?,
+    dynamicThemeImages: json['dynamicThemeImages'] as bool? ?? false,
+    darkAvatarUrl: json['darkAvatarUrl'] as String?,
+    grayscaleAvatarUrl: json['grayscaleAvatarUrl'] as String?,
+    lightAvatarUrl: json['lightAvatarUrl'] as String?,
+    darkBackgroundUrl: json['darkBackgroundUrl'] as String?,
+    grayscaleBackgroundUrl: json['grayscaleBackgroundUrl'] as String?,
+    lightBackgroundUrl: json['lightBackgroundUrl'] as String?,
+  );
 }
