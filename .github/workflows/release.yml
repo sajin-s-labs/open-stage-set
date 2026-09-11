@@ -112,7 +112,7 @@ jobs:
             cp web/icons/Icon-512.png packaging/flatpak/open-stage-set.png
             flatpak-builder --user --repo=flatpak-repo --force-clean build-flatpak packaging/flatpak/org.openstageset.OpenStageSet.yml || true
             if [ -d "flatpak-repo" ]; then
-              flatpak build-bundle --user flatpak-repo dist/open-stage-set.flatpak org.openstageset.OpenStageSet || true
+              flatpak build-bundle flatpak-repo dist/open-stage-set.flatpak org.openstageset.OpenStageSet
             fi
           else
             echo "Flatpak runtime not available, skipping flatpak bundle"
